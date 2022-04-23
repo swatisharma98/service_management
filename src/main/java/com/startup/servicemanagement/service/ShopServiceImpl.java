@@ -23,4 +23,13 @@ public class ShopServiceImpl implements ShopService{
 		
 	}
 
+	@Override
+	public Shop updateShop(Shop shop) {
+		if(shop.getId() == null) {
+			System.out.println("Id not found");
+		}
+		shopRepo.save(shop);
+		return shop;
+	}
+
 }

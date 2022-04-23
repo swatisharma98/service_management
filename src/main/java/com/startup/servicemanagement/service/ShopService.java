@@ -6,4 +6,6 @@ public interface ShopService {
 
 	Shop createShop(Shop shop);
 
+	Shop updateShop(Shop shop);
+
 }
