@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
@@ -34,7 +36,7 @@ public class ShopServiceImpl implements ShopService{
 	
 	private static final String BUCKET_NAME = "barber/";
 	private static final String fileUploadUrl = "http://localhost:8000/upload/";
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(ShopServiceImpl.class);
 
 	@Autowired
 	ShopRepository shopRepo;
@@ -48,13 +50,13 @@ public class ShopServiceImpl implements ShopService{
 	@Override
 	@Transactional
 	public Shop createShop(Shop shop, MultipartFile[] file) {
-		
+	 LOGGER.info("Inside create Shop=>",shop);
 		
 	 shop.setId(UUID.randomUUID().toString());
 		
 		try {
 			
-			System.out.println("In Try Block");
+			LOGGER.info("Inside Try Block =>",shop);
 			List<UploadImagePojo> list = new ArrayList<>();
 			List<ImageInfo> imageInfo = new ArrayList<>();
 			
@@ -77,23 +79,23 @@ public class ShopServiceImpl implements ShopService{
 			}
 			
 			shop.setImageInfo(imageInfo);
-			
+			LOGGER.info("Inserting in Shop =>",shop);
 			shopRepo.save(shop);
 			
 			
-			System.out.println("End Try Block");
+			LOGGER.info("Added Successfully : [{}}",shop);
 			
 			return shop;
 		   
 		}catch(Exception e) {
-			System.out.println("Exception Caught");
+			LOGGER.info("Exception Caught : [{}}");
 		}
 		
 		 return null;
 	}
 	
 	public UploadImagePojo saveThumbNailImage(String id, MultipartFile uploadimage) {
-		
+		LOGGER.info("Inside Save Image:file name =>",uploadimage.getOriginalFilename());
 		UploadImagePojo bean = new UploadImagePojo();
 		
 		HttpHeaders headers = new HttpHeaders();
@@ -116,14 +118,12 @@ public class ShopServiceImpl implements ShopService{
 		body.add("file", fileEntity);
 
 		HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
+		LOGGER.info("Calling Minio Service:fileUploadUrl =>",fileUploadUrl);
 		ResponseEntity<UploadImagePojo> uip = restTemplate.exchange(fileUploadUrl + BUCKET_NAME + id,
 				HttpMethod.POST, requestEntity, UploadImagePojo.class);
-		System.out.println("After Minio Complete");
 		bean.setFileName(uip.getBody().getFileName());
 		bean.setId(uip.getBody().getId());
 		bean.setPath(uip.getBody().getPath());
-		System.out.println("uip====="+bean);
 		return bean;
 	}
 
