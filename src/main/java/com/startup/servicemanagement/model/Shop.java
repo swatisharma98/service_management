@@ -15,6 +15,8 @@ public class Shop {
 	private Address address;
 	private List<ShopTime> shopTime;
 	private List<Service> service;
+	private List<ImageInfo> imageInfo;
+	
 	
 	public String getId() {
 		return id;
@@ -45,6 +47,12 @@ public class Shop {
 	}
 	public void setShopTime(List<ShopTime> shopTime) {
 		this.shopTime = shopTime;
+	}
+	public List<ImageInfo> getImageInfo() {
+		return imageInfo;
+	}
+	public void setImageInfo(List<ImageInfo> imageInfo) {
+		this.imageInfo = imageInfo;
 	}
 	
 	
