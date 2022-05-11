@@ -17,4 +17,6 @@ public interface ShopService {
 
 	Shop createShop(Shop shop, MultipartFile[] file);
 
+	Shop findShopById(String id);
+
 }

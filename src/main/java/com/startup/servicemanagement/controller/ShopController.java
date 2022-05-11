@@ -35,9 +35,7 @@ public class ShopController {
 	
 	@PostMapping(value = "/shop", consumes = { MediaType.APPLICATION_JSON_VALUE,MediaType.MULTIPART_FORM_DATA_VALUE })
 	public Shop createShop(@RequestPart("Form") String documents,@RequestPart(value = "file") MultipartFile[] file) throws JsonMappingException, JsonProcessingException {
-		
 		Shop shop = new ObjectMapper().readValue(documents, Shop.class);
-
 		return shopService.createShop(shop,file);
 	}
 	
@@ -47,9 +45,14 @@ public class ShopController {
 	}
 	
 	
-	@GetMapping("/shop/{id}")
+	@GetMapping("/shop")
 	public List<Shop> findAllShop(@RequestParam(value="filter",required = false) String data){
 		return shopService.findShop(data);
+	}
+	  
+	@GetMapping("/shop/{id}")
+	public Shop findShopById(@PathVariable(value="id") String id){
+		return shopService.findShopById(id);
 	}
 
 	@DeleteMapping("/shop")

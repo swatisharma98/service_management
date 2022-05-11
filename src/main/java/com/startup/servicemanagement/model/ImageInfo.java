@@ -23,6 +23,12 @@ public class ImageInfo {
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
 	}
+	@Override
+	public String toString() {
+		return "ImageInfo [id=" + id + ", filePath=" + filePath + ", fileName=" + fileName + "]";
+	}
+	
+	
 	
 	
 	

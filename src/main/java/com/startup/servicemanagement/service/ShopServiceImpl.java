@@ -36,6 +36,7 @@ public class ShopServiceImpl implements ShopService{
 	
 	private static final String BUCKET_NAME = "barber/";
 	private static final String fileUploadUrl = "http://localhost:8000/upload/";
+	private static final String fileDeleteUrl = "http://localhost:8000/delete/";
 	private static final Logger LOGGER = LoggerFactory.getLogger(ShopServiceImpl.class);
 
 	@Autowired
@@ -57,9 +58,7 @@ public class ShopServiceImpl implements ShopService{
 		try {
 			
 			LOGGER.info("Inside Try Block =>",shop);
-			List<UploadImagePojo> list = new ArrayList<>();
 			List<ImageInfo> imageInfo = new ArrayList<>();
-			
 			
 			for(MultipartFile fl:file) {
 				
@@ -67,24 +66,18 @@ public class ShopServiceImpl implements ShopService{
 			
 			String id = UUID.randomUUID().toString();
 		
-			UploadImagePojo bean = saveThumbNailImage(id,fl);
+			UploadImagePojo bean = saveImage(id,fl);
 			
 			imgInfo.setFileName(bean.getFileName());
 			imgInfo.setId(bean.getId());
 			imgInfo.setFilePath(bean.getPath());
-			
-			list.add(bean);
 			imageInfo.add(imgInfo);
 			
 			}
-			
 			shop.setImageInfo(imageInfo);
 			LOGGER.info("Inserting in Shop =>",shop);
 			shopRepo.save(shop);
-			
-			
 			LOGGER.info("Added Successfully : [{}}",shop);
-			
 			return shop;
 		   
 		}catch(Exception e) {
@@ -94,7 +87,7 @@ public class ShopServiceImpl implements ShopService{
 		 return null;
 	}
 	
-	public UploadImagePojo saveThumbNailImage(String id, MultipartFile uploadimage) {
+	private UploadImagePojo saveImage(String id, MultipartFile uploadimage) {
 		LOGGER.info("Inside Save Image:file name =>",uploadimage.getOriginalFilename());
 		UploadImagePojo bean = new UploadImagePojo();
 		
@@ -140,8 +133,7 @@ public class ShopServiceImpl implements ShopService{
 	public List<Shop> findShop(String data) {
 		
 		if(data.trim().length() > 0 || data != null) {
-			return shopRepo.findAllShop(data);
-			
+			 return shopRepo.findAllShop(data);	
 		}
 		
 		return shopRepo.findAll();
@@ -149,10 +141,52 @@ public class ShopServiceImpl implements ShopService{
 	}
 
 	@Override
+	@Transactional
 	public String deleteShop(String id) {
-		shopRepo.deleteById(id);
+		
+		try {
+			
+			Optional<Shop> shop = this.shopRepo.findById(id);
+			for(ImageInfo image:shop.get().getImageInfo()) {
+				removeImage(fileDeleteUrl,image);
+			}
+			shopRepo.deleteById(id);
+			
+		}catch(Exception e) {
+			
+			LOGGER.info("FOUND EXCEPTION");
+			return "fail";
+		}
+		
 		return "success";
 	}
+	
+	
+	
+	private void removeImage(String fileDeleteUrl,ImageInfo image) {
+		restTemplate.delete(fileDeleteUrl + BUCKET_NAME + image.getId() + "/" + image.getFileName(),
+				"img-del");
+	}
+
+	@Override
+	@Transactional
+	public Shop findShopById(String id) {
+		LOGGER.info("Inside find shop by Id=>",id);
+		try {
+			Optional<Shop> shop = shopRepo.findById(id);
+			LOGGER.info("Getting shop info=>",shop.get());
+			if(!shop.isPresent()) {
+				LOGGER.info("NOT FOUND EXCEPTION");
+			}
+			LOGGER.info("Called Shop=>",shop.get());
+			return shop.get();
+			
+		}catch(Exception e) {
+			LOGGER.info("FOUND EXCEPTION");
+		}
+		return null;
+	}
+	
 
 	
 
